@@ -99,6 +99,7 @@ def group_sample_fill(df):
     clusters = []
     for i in range(1, 46):
         cl_name = 'Cluster ' + str(i)
+        cluster = df.loc[cl_name]
         cluster.index = pd.PeriodIndex(cluster.index, freq='A')
         cluster = cluster.resample('M').ffill()
         cluster['Cluster'] = cl_name
