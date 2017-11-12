@@ -121,6 +121,19 @@ def group_sample_fill(df):
     return df
 
 
+def prep_df_ml():
+    df_char = create_char_table()
+
+    df_cl = pg.saveTable('census_tracts')
+    df_cl.columns = ['Census Tract', 'Lat', 'Lon', 'Cluster', 'Neighborhood']
+    df = pd.merge(df_char, df_cl, on='Census Tract')
+
+    df = group_sample_fill(df)
+
+    df.drop(['Date', 'Cluster'], axis=1, inplace=True)
+
+    return df
+
 ################################################################################
 # Execution
 ################################################################################
@@ -130,11 +143,3 @@ if __name__ == '__main__':
     pd.set_option('display.width', 125)
     pd.set_option('display.max_rows', None)
     pd.set_option('display.max_columns', None)
-
-    df_char = create_char_table()
-
-    df_cl = pg.saveTable('census_tracts')
-    df_cl.columns = ['Census Tract', 'Lat', 'Lon', 'Cluster', 'Neighborhood']
-    df = pd.merge(df_char, df_cl, on='Census Tract')
-
-    df = group_sample_fill(df)
