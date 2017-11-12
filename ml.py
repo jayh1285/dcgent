@@ -36,7 +36,7 @@ def pca_kmeans_sil(df):
 
         # Create a subplot with 1 row and 2 columns
         fig, (ax1, ax2) = plt.subplots(1, 2)
-        fig.set_size_inches(18, 7)
+        # fig.set_size_inches(36, 14)
 
         # The 1st subplot is the silhouette plot
         # The silhouette coefficient can range from -1, 1 but in this example all
@@ -88,6 +88,22 @@ def pca_kmeans_sil(df):
         ax1.set_yticks([])  # Clear the yaxis labels / ticks
         ax1.set_xticks([-0.1, 0, 0.2, 0.4, 0.6, 0.8, 1])
 
+        # Create a meshgrid to visualize the decision boundary
+        h = 10
+        x_min, x_max = reduced_data[:, 0].min() - 1, reduced_data[:, 0].max() + 1
+        y_min, y_max = reduced_data[:, 1].min() - 1, reduced_data[:, 1].max() + 1
+        xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+
+        # Obtain labels for meshgrid
+        Z = kmeans.predict(np.c_[xx.ravel(), yy.ravel()])
+
+        # Plot decision boundary
+        Z = Z.reshape(xx.shape)
+        ax2.imshow(Z, interpolation='nearest',
+                   extent=(xx.min(), xx.max(), yy.min(), yy.max()),
+                   cmap=plt.cm.Paired,
+                   aspect='auto', origin='lower')
+
         # 2nd Plot showing the actual clusters formed
         colors = cm.spectral(cluster_labels.astype(float) / n_clusters)
         ax2.scatter(reduced_data[:, 0], reduced_data[:, 1], marker='.', s=30, lw=0, alpha=0.7,
@@ -104,8 +120,8 @@ def pca_kmeans_sil(df):
                         s=50, edgecolor='k')
 
         ax2.set_title("The visualization of the clustered data.")
-        ax2.set_xlabel("Feature space for the 1st feature")
-        ax2.set_ylabel("Feature space for the 2nd feature")
+        ax2.set_xlabel("Feature space for the 1st PCA component")
+        ax2.set_ylabel("Feature space for the 2nd PCA component")
 
         plt.suptitle(("Silhouette analysis for KMeans clustering on sample data "
                       "with n_clusters = %d" % n_clusters),
