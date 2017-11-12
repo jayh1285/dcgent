@@ -7,8 +7,9 @@
 # Imports
 ################################################################################
 
-from sqlalchemy import create_engine
 import pandas as pd
+from sqlalchemy import create_engine
+import readcsv
 
 ################################################################################
 # Functions
@@ -45,6 +46,18 @@ def printTable(nameTable=None):
     results = readTable(nameTable, engine)
     for result in results:
         print(result)
+
+
+def createPopPovTable(df):
+    engine = createEngine()
+    print(engine.table_names())
+
+    engine.execute("CREATE TABLE IF NOT EXISTS population_poverty \
+                    (period text, cluster text, population int, poverty int)")
+
+    for lab, row in df.iterrows():
+        engine.execute("INSERT INTO population_poverty (period, cluster, population, poverty) \
+                        VALUES (%s, %s, %s, %s)", str(row['Date']), row['Cluster'], row['Population'], row['Poverty Below 100'])
 
 
 def createCensusTable(df):
@@ -101,4 +114,5 @@ def trimPovString():
 
 
 if __name__ == '__main__':
-    pass
+    df = readcsv.prep_df_ml()
+    createPopPovTable(df)
