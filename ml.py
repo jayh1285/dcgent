@@ -15,28 +15,28 @@ import readcsv
 import time
 
 from sklearn.decomposition import PCA
-from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_samples, silhouette_score
+from sklearn.cluster import KMeans, SpectralClustering, AgglomerativeClustering
+from sklearn.metrics import silhouette_samples, silhouette_score, calinski_harabaz_score
+from sklearn import metrics
 
 ################################################################################
 # Functions
 ################################################################################
 
 
-def pca_kmeans_sil(df):
+def pca_kmeans(df):
     """Visualization of K-Means clustering on PCA-reduced data with silhouette scores."""
 
     range_n_clusters = [3, 4, 5, 6, 7]
     for n_clusters in range_n_clusters:
         # Initialize the clusterer
         reduced_data = PCA(n_components=2).fit_transform(df)
-        kmeans = KMeans(init='k-means++', n_clusters=n_clusters, n_init=10)
-        kmeans.fit(reduced_data)
-        cluster_labels = kmeans.predict(reduced_data)
+        model = KMeans(init='k-means++', n_clusters=n_clusters, n_init=10)
+        model.fit(reduced_data)
+        cluster_labels = model.predict(reduced_data)
 
         # Create a subplot with 1 row and 2 columns
         fig, (ax1, ax2) = plt.subplots(1, 2)
-        # fig.set_size_inches(36, 14)
 
         # The 1st subplot is the silhouette plot
         # The silhouette coefficient can range from -1, 1 but in this example all
@@ -52,6 +52,10 @@ def pca_kmeans_sil(df):
         silhouette_avg = silhouette_score(reduced_data, cluster_labels)
         print("For n_clusters =", n_clusters,
               "The average silhouette_score is :", silhouette_avg)
+
+        calinski = calinski_harabaz_score(reduced_data, cluster_labels)
+        print("For n_clusters =", n_clusters,
+              "The Calinkski-Harabaz index is :", calinski)
 
         # Compute the silhouette scores for each sample
         sample_silhouette_values = silhouette_samples(reduced_data, cluster_labels)
@@ -95,7 +99,7 @@ def pca_kmeans_sil(df):
         xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
 
         # Obtain labels for meshgrid
-        Z = kmeans.predict(np.c_[xx.ravel(), yy.ravel()])
+        Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
 
         # Plot decision boundary
         Z = Z.reshape(xx.shape)
@@ -110,7 +114,7 @@ def pca_kmeans_sil(df):
                     c=colors, edgecolor='k')
 
         # Labeling the clusters
-        centers = kmeans.cluster_centers_
+        centers = model.cluster_centers_
         # Draw white circles at cluster centers
         ax2.scatter(centers[:, 0], centers[:, 1], marker='o',
                     c="white", alpha=1, s=200, edgecolor='k')
@@ -123,14 +127,14 @@ def pca_kmeans_sil(df):
         ax2.set_xlabel("Feature space for the 1st PCA component")
         ax2.set_ylabel("Feature space for the 2nd PCA component")
 
-        plt.suptitle(("Silhouette analysis for KMeans clustering on sample data "
+        plt.suptitle(("Silhouette analysis for clustering on sample data "
                       "with n_clusters = %d" % n_clusters),
                      fontsize=14, fontweight='bold')
 
         plt.show()
 
 
-def pca_kmeans(df):
+def pca_kmeans_old(df):
     """Visualization of K-Means clustering on PCA-reduced data."""
 
     # Time beginning of modeling
@@ -182,6 +186,36 @@ def pca_kmeans(df):
     plt.show()
 
 
+def spectral(df):
+    range_n_clusters = [3, 4, 5, 6, 7]
+    for n_clusters in range_n_clusters:
+        model = SpectralClustering(n_clusters=n_clusters)
+        cluster_labels = model.fit_predict(df)
+
+        silhouette_avg = silhouette_score(df, cluster_labels)
+        print("For n_clusters =", n_clusters,
+              "The average silhouette_score is :", silhouette_avg)
+
+        calinski = calinski_harabaz_score(df, cluster_labels)
+        print("For n_clusters =", n_clusters,
+              "The Calinkski-Harabaz index is :", calinski)
+
+
+def ward(df):
+    range_n_clusters = [3, 4, 5, 6, 7]
+    for n_clusters in range_n_clusters:
+        model = AgglomerativeClustering(n_clusters=n_clusters)
+        cluster_labels = model.fit_predict(df)
+
+        silhouette_avg = silhouette_score(df, cluster_labels)
+        print("For n_clusters =", n_clusters,
+              "The average silhouette_score is :", silhouette_avg)
+
+        calinski = calinski_harabaz_score(df, cluster_labels)
+        print("For n_clusters =", n_clusters,
+              "The Calinkski-Harabaz index is :", calinski)
+
+
 ################################################################################
 # Execution
 ################################################################################
@@ -189,4 +223,4 @@ def pca_kmeans(df):
 
 if __name__ == '__main__':
     df = readcsv.prep_df_ml()
-    pca_kmeans_sil(df)
+    spectral(df)
