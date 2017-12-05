@@ -114,5 +114,4 @@ def trimPovString():
 
 
 if __name__ == '__main__':
-    df = readcsv.prep_df_ml()
-    createPopPovTable(df)
+    df = pd.read_sql_table('neighborhood_clusters', 'postgres://Jay:Huang@de-dbinstance.c6dfmakosb5f.us-east-1.rds.amazonaws.com:5432/dataextractorsDB')
